@@ -10,7 +10,7 @@ model = joblib.load("model.pkl")
 
 app = FastAPI()
 
-# Static ফোল্ডার mount করা
+# Static ফাইল মাউন্ট করা
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Home page serve করা
@@ -25,4 +25,4 @@ class StudyHours(BaseModel):
 @app.post("/predict")
 def predict(data: StudyHours):
     prediction = model.predict([[data.hours]])
-    return {"predicted_score": prediction[0]}
+    return {"predicted_score": round(prediction[0], 2)}
