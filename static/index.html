@@ -2,27 +2,14 @@
 <html>
 <head>
     <title>Score Predictor</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Study Hours to Score Predictor</h1>
+    <h1>Study Hours → Score Predictor</h1>
     <input type="number" id="hours" placeholder="Enter study hours">
     <button onclick="predictScore()">Predict</button>
     <p id="result"></p>
 
-    <script>
-        async function predictScore() {
-            const hours = document.getElementById("hours").value;
-            const response = await fetch("/predict", {
-    method: "POST",
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify({hours: parseFloat(hours)})
-});
-            const data = await response.json();
-            document.getElementById("result").innerText = 
-                `Predicted Score: ${data.predicted_score.toFixed(2)}`;
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
