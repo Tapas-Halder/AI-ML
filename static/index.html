@@ -2,14 +2,74 @@
 <html>
 <head>
     <title>Score Predictor</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: #f0f8ff;
+            padding: 50px;
+        }
+        h1 {
+            color: #333;
+        }
+        input {
+            padding: 10px;
+            width: 200px;
+            margin-right: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 1em;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: #333;
+        }
+        .container {
+            display: inline-block;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+    </style>
 </head>
 <body>
-    <h1>Study Hours → Score Predictor</h1>
-    <input type="number" id="hours" placeholder="Enter study hours">
-    <button onclick="predictScore()">Predict</button>
-    <p id="result"></p>
+    <div class="container">
+        <h1>Study Hours → Score Predictor</h1>
+        <input type="number" id="hours" placeholder="Enter study hours" min="0">
+        <button onclick="predictScore()">Predict</button>
+        <p id="result"></p>
+    </div>
 
-    <script src="script.js"></script>
+    <script>
+        async function predictScore() {
+            const hours = document.getElementById("hours").value;
+            if(hours === "" || hours < 0){
+                alert("Please enter valid study hours!");
+                return;
+            }
+            const response = await fetch("/predict", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ hours: parseFloat(hours) })
+            });
+            const data = await response.json();
+            document.getElementById("result").innerText = `Predicted Score: ${data.predicted_score}`;
+        }
+    </script>
 </body>
 </html>
