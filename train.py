@@ -5,7 +5,7 @@ import joblib
 # data
 data = {
     "study_hours": [1, 2, 3, 4, 5],
-    "score": [35, 45, 55, 65, 75]
+    "score": [10, 20, 30, 40, 50]
 }
 
 df = pd.DataFrame(data)
