@@ -1,75 +1,461 @@
-<!DOCTYPE html>
-<html>
+ <!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Score Predictor</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Score Predictor | Linear Regression Model</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4361ee;
+            --primary-dark: #3a56d4;
+            --secondary: #7209b7;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+            --success: #4cc9f0;
+            --card-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background: #f0f8ff;
-            padding: 50px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            line-height: 1.6;
         }
-        h1 {
-            color: #333;
-        }
-        input {
-            padding: 10px;
-            width: 200px;
-            margin-right: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 1em;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            background-color: #007BFF;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #result {
-            margin-top: 20px;
-            font-size: 1.2em;
-            color: #333;
-        }
+
         .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        @media (min-width: 992px) {
+            .container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            grid-column: 1 / -1;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .ml-badge {
             display: inline-block;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+        }
+
+        .ml-badge i {
+            margin-right: 8px;
+        }
+
+        .card {
             background: white;
+            border-radius: 20px;
             padding: 40px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .prediction-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .prediction-card h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .prediction-card h2 i {
+            margin-right: 10px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-container i {
+            position: absolute;
+            left: 15px;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        .input-container input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            transition: var(--transition);
+            outline: none;
+        }
+
+        .input-container input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .predict-btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .predict-btn i {
+            margin-right: 10px;
+        }
+
+        .predict-btn:hover {
+            background: linear-gradient(to right, var(--primary-dark), #651a98);
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .predict-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f3ff 100%);
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid var(--primary);
+            display: none;
+        }
+
+        .result-container.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            font-size: 1.1rem;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .result-value {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            line-height: 1;
+        }
+
+        .result-unit {
+            font-size: 1.2rem;
+            color: var(--gray);
+            margin-left: 5px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .info-card h2 {
+            color: var(--secondary);
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-card h2 i {
+            margin-right: 10px;
+            background: linear-gradient(to right, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .info-content {
+            margin-bottom: 30px;
+        }
+
+        .info-content p {
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .highlight {
+            background-color: rgba(67, 97, 238, 0.1);
+            padding: 15px;
             border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+            border-left: 4px solid var(--primary);
+            margin: 20px 0;
+        }
+
+        .formula-box {
+            background-color: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: var(--primary);
+            border: 1px dashed #c3cfe2;
+        }
+
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            background: #f8f9ff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .feature i {
+            color: var(--primary);
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        footer {
+            margin-top: 40px;
+            text-align: center;
+            color: var(--gray);
+            font-size: 0.9rem;
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .card {
+                padding: 30px 25px;
+            }
+            
+            .result-value {
+                font-size: 2.5rem;
+            }
+            
+            .feature {
+                min-width: 100%;
+            }
+            
+            .container {
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .card {
+                padding: 25px 20px;
+            }
+            
+            .input-container input {
+                padding: 14px 20px 14px 45px;
+            }
+            
+            .predict-btn {
+                padding: 16px 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Study Hours → Score Predictor</h1>
-        <input type="number" id="hours" placeholder="Enter study hours" min="0">
-        <button onclick="predictScore()">Predict</button>
-        <p id="result"></p>
-    </div>
+        <div class="header">
+            <h1>Study Hours → Score Predictor</h1>
+            <div class="ml-badge">
+                <i class="fas fa-brain"></i> AI/ML Linear Regression Model
+            </div>
+            <p class="subtitle">Predict your exam score based on study hours using a machine learning linear regression algorithm</p>
+        </div>
 
-    <script>
-        async function predictScore() {
-            const hours = document.getElementById("hours").value;
-            if(hours === "" || hours < 0){
-                alert("Please enter valid study hours!");
-                return;
-            }
-            const response = await fetch("/predict", {
-                method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({ hours: parseFloat(hours) })
-            });
-            const data = await response.json();
-            document.getElementById("result").innerText = `Predicted Score: ${data.predicted_score}`;
+        <div class="card prediction-card">
+            <h2><i class="fas fa-chart-line"></i> Score Prediction</h2>
+            
+            <div class="input-group">
+                <label for="hours">Enter Study Hours</label>
+                <div class="input-container">
+                    <i class="fas fa-clock"></i>
+                    <input type="number" id="hours" placeholder="e.g., 4.5" min="0" step="0.5">
+                </div>
+                <small style="color: var(--gray); margin-top: 5px; display: block;">Enter the number of hours you studied (0-24)</small>
+            </div>
+            
+            <button class="predict-btn" onclick="predictScore()">
+                <i class="fas fa-calculator"></i> Predict My Score
+            </button>
+            
+            <div class="result-container" id="resultContainer">
+                <div class="result-title">Predicted Exam Score</div>
+                <div class="result-value" id="result">--</div>
+                <div class="result-unit">out of 100</div>
+            </div>
+        </div>
+
+        <div class="card info-card">
+            <h2><i class="fas fa-robot"></i> About the AI Model</h2>
+            
+            <div class="info-content">
+                <p>This predictor uses a <strong>Linear Regression</strong> machine learning model trained on historical data of study hours and corresponding exam scores.</p>
+                
+                <div class="highlight">
+                    <p><i class="fas fa-lightbulb"></i> <strong>How it works:</strong> The model finds the best-fit line through data points (study hours vs. scores) and uses this line to make predictions for new inputs.</p>
+                </div>
+                
+                <div class="formula-box">
+                    y = mx + b<br>
+                    <small>Where: y = predicted score, x = study hours, m = slope, b = intercept</small>
+                </div>
+                
+                <p>The algorithm has been trained on hundreds of data points to establish a reliable relationship between study time and performance.</p>
+            </div>
+            
+            <h3><i class="fas fa-star"></i> Key Features</h3>
+            <div class="features">
+                <div class="feature">
+                    <i class="fas fa-bolt"></i>
+                    <span>Real-time prediction</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-mobile-alt"></i>
+                    <span>Fully responsive</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Based on ML model</span>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Accurate results</span>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>AI Score Predictor | Linear Regression Model &copy; 2023 | For Educational Purposes</p>
+            <p>Note: Predictions are based on statistical modeling and should be used as a guideline only.</p>
+        </footer>
+    </div>
+<script>
+    async function predictScore() {
+        const hours = document.getElementById("hours").value;
+        if(hours === "" || hours < 0){
+            alert("Please enter valid study hours!");
+            return;
         }
-    </script>
+        const response = await fetch("/predict", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ hours: parseFloat(hours) })
+        });
+        const data = await response.json();
+        document.getElementById("result").innerText = `Predicted Score: ${data.predicted_score}`;
+    }
+</script>
 </body>
 </html>
